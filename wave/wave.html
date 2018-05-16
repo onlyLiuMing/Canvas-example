@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>涟漪简洁版动画</title>
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			border: none;
+		}
+
+	</style>
+</head>
+
+<body>
+	<canvas id="canvas"></canvas>
+</body>
+<script>
+	var canvas = document.getElementById( 'canvas' );
+	var ctx = canvas.getContext( '2d' );
+	var cw = canvas.width = document.documentElement.clientWidth;
+	var ch = canvas.height = document.documentElement.clientHeight;
+	var bgc = canvas.style.background = '#f1f1f1';
+
+	var CIRCLES = [];
+
+	// 圆圈的构造函数
+	function Circle( x, y ) {
+		this.x = x; // 圆心 x
+		this.y = y; // 圆心y
+		this.radius = 5; //起始半径
+	}
+
+	// 绘画函数
+	function draw() {
+		// 设置定时器
+		// 这里也可以用window。requestAnimationFrame()函数，个人习惯用setinterval
+		var timer = setInterval( function () {
+			var clearFirstPoint = false;
+			// 清理canvas
+			ctx.clearRect( 0, 0, cw, ch );
+			// 画圆并判断
+			for ( var i in CIRCLES ) {
+				var circle = CIRCLES[ i ];
+				var w_tag = circle.x > cw / 2;
+				var h_tag = circle.y > ch / 2;
+				var diff_value; // 半径对比长度,半径超过此数字就不进行画圆
+				if ( w_tag ) {
+					diff_value = h_tag ? Math.sqrt( Math.pow( circle.x, 2 ) + Math.pow( circle.y, 2 ) ) : Math.sqrt( Math.pow( circle.x, 2 ) + Math.pow( ch - circle.y, 2 ) );
+				} else {
+					diff_value = h_tag ? Math.sqrt( Math.pow( cw - circle.x, 2 ) + Math.pow( circle.y, 2 ) ) : Math.sqrt( Math.pow( cw - circle.x, 2 ) + Math.pow( ch - circle.y, 2 ) );
+				}
+				// 判断是否超出界限(如果当前半径比diff_value长，则圆圈超出canvas的范围)
+				if ( circle.radius > diff_value ) {
+					console.log( 'stop' );
+					clearFirstPoint = true;
+					continue;
+				}
+				ctx.beginPath();
+				ctx.arc( CIRCLES[ i ].x, CIRCLES[ i ].y, CIRCLES[ i ].radius, 0, 2 * Math.PI, false );
+				ctx.stroke();
+				circle.radius += 5;
+			};
+
+			if ( clearFirstPoint ) {
+				CIRCLES.shift();
+				clearFirstPoint = false;
+			}
+		}, 16 )
+	}
+
+	canvas.onmousedown = function ( e ) {
+		// 点击canvas时添加一个新的point点
+		CIRCLES.push( new Circle( e.x, e.y ) )
+	}
+
+	draw()
+
+</script>
+
+</html>
